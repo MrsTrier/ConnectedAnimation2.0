@@ -14,25 +14,17 @@ class ConnectedAnimationViewController: UIViewController {
         slider.maximumValue = 1
         slider.minimumValue = 0
         slider.value = 1
-
-        slider.addAction(UIAction { _ in
-            self.animator?.isReversed = false
-            self.animator?.fractionComplete = CGFloat(slider.maximumValue) - CGFloat(slider.value)
-        }, for: .valueChanged)
-
-        slider.addAction(UIAction { _ in
-            slider.setValue(1, animated: true)
-
-            self.animator?.isReversed = true
-            self.animator?.startAnimation()
-        }, for: [.touchUpInside, .touchUpOutside])
+        slider.tintColor = .black
+        
+        setupSliderActions(for: slider)
 
         return slider
     }()
 
     private lazy var viewToAnimate: UIView = {
-        let view = UIView()
-        view.backgroundColor = .magenta
+        let view = UIImageView(image: UIImage(named: "Otets"))
+        view.backgroundColor = .systemBlue
+        view.clipsToBounds = true
         view.layer.cornerRadius = 150 / 6
         return view
     }()
@@ -41,10 +33,12 @@ class ConnectedAnimationViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         view.backgroundColor = .white
         view.addSubview(viewToAnimate)
         view.addSubview(slider)
 
+        setupDeviceOrientationNotifications()
         setupLayout()
         setupAnimator()
     }
@@ -57,7 +51,6 @@ class ConnectedAnimationViewController: UIViewController {
 
         NSLayoutConstraint.activate([
             viewToAnimate.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor, constant: 100),
-
             viewToAnimate.widthAnchor.constraint(equalToConstant: 150),
             viewToAnimate.heightAnchor.constraint(equalToConstant: 150),
             viewToAnimate.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
@@ -69,13 +62,43 @@ class ConnectedAnimationViewController: UIViewController {
     }
 
     private func setupAnimator() {
-        animator = UIViewPropertyAnimator(duration: 0.5, curve: .linear) {
-            self.viewToAnimate.center = CGPoint(x: self.view.layoutMargins.left + 25, y: self.viewToAnimate.center.y)
+        animator = UIViewPropertyAnimator(duration: 0.3, curve: .linear) {
+            self.viewToAnimate.center = CGPoint(
+                x: self.view.layoutMargins.left + 25,
+                y: self.viewToAnimate.center.y
+            )
 
             self.viewToAnimate.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
                 .concatenating(CGAffineTransform(rotationAngle: -CGFloat(Float.pi / 2)))
         }
         animator?.pausesOnCompletion = true
+    }
+
+    private func setupSliderActions(for slider: UISlider) {
+        slider.addAction(UIAction { _ in
+            self.animator?.isReversed = false
+            self.animator?.fractionComplete = CGFloat(slider.maximumValue) - CGFloat(slider.value)
+        }, for: .valueChanged)
+
+        slider.addAction(UIAction { _ in
+            slider.setValue(1, animated: true)
+
+            self.animator?.isReversed = true
+            self.animator?.startAnimation()
+        }, for: [.touchUpInside, .touchUpOutside])
+    }
+
+    private func setupDeviceOrientationNotifications() {
+        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(self.onOrientationChange),
+            name: UIDevice.orientationDidChangeNotification, object: nil
+        )
+    }
+
+    @objc func onOrientationChange() {
+        animator?.stopAnimation(true)
+        setupAnimator()
     }
 }
 

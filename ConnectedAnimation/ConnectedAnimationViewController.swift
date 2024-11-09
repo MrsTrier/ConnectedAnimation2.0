@@ -15,7 +15,7 @@ class ConnectedAnimationViewController: UIViewController {
         slider.minimumValue = 0
         slider.value = 1
         slider.tintColor = .black
-        
+
         setupSliderActions(for: slider)
 
         return slider
@@ -23,7 +23,6 @@ class ConnectedAnimationViewController: UIViewController {
 
     private lazy var viewToAnimate: UIView = {
         let view = UIImageView(image: UIImage(named: "Otets"))
-        view.backgroundColor = .systemBlue
         view.clipsToBounds = true
         view.layer.cornerRadius = 150 / 6
         return view

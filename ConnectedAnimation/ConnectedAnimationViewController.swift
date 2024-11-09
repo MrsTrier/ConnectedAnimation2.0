@@ -7,6 +7,11 @@
 
 import UIKit
 
+struct Constants {
+    static let viewSize = 150
+    static let shrinkingRate = 0.666
+}
+
 class ConnectedAnimationViewController: UIViewController {
 
     private lazy var slider: UISlider = {
@@ -63,11 +68,14 @@ class ConnectedAnimationViewController: UIViewController {
     private func setupAnimator() {
         animator = UIViewPropertyAnimator(duration: 0.3, curve: .linear) {
             self.viewToAnimate.center = CGPoint(
-                x: self.view.layoutMargins.left + 25,
+                x: self.view.layoutMargins.left + ((Double(Constants.viewSize) * Constants.shrinkingRate) / 2),
                 y: self.viewToAnimate.center.y
             )
 
-            self.viewToAnimate.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+            self.viewToAnimate.transform = CGAffineTransform(
+                scaleX: Constants.shrinkingRate,
+                y: Constants.shrinkingRate
+            )
                 .concatenating(CGAffineTransform(rotationAngle: -CGFloat(Float.pi / 2)))
         }
         animator?.pausesOnCompletion = true
